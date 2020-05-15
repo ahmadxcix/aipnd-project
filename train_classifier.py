@@ -75,16 +75,13 @@ def classifier(in_arg):
         nn.Linear(init_inputs, hidden_units),
         nn.ReLU(),
         nn.Dropout(0.5),
-        nn.Linear(hidden_units, int(hidden_units/2)),
-        nn.ReLU(),
-        nn.Dropout(0.5),
-        nn.Linear(int(hidden_units/2), 102),
+        nn.Linear(hidden_units, 102)
         nn.LogSoftmax(dim=1)
     )
 
     criterion = nn.NLLLoss()
     optimizer = optim.Adam(model.classifier.parameters(), lr=in_arg.learning_rate)
-    device = torch.device('cuda' if in_arg.gpu else 'cpu')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.to(device)
     epochs = in_arg.epochs
     steps = 0

@@ -70,9 +70,19 @@ def predict(image_path, model, topk):
     with torch.no_grad():
         output = model.forward(img_tensor)
     ps = torch.exp(output)
-    top_p, top_class = ps.topk(topk, dim=1)
+    top_p = ps.topk(topk, dim=1)[0]
+    top_class = ps.topk(topk, dim=1)[1]
     
-    return top_p, top_class
+    top_p_ls = np.array(top_p)[0]
+    top_class_ls = np.array(top_class[0])
+
+    rev_dic = {y:x for x, y in model.class_to_idx.items()}
+    
+    top_c = []
+    for i in top_class_ls:
+        top_c.append(rev_dic[i])
+    
+    return top_p_ls, top_c
 
 
 
@@ -82,21 +92,14 @@ def classifier(in_arg):
     
     img_path = in_arg.image_path
     model = load(in_arg.checkpoint)
-    device = torch.device('cuda' if in_arg.gpu else 'cpu')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.to(device)
 
     topk = in_arg.topk
     
     ps, classes = predict(img_path, model, topk)
-    ps, classes = ps.numpy(), classes.numpy()
+    classes_names = [cat_to_name[x] for x in classes]
     
-    classes_names = []
-    probilities = []
-    dic = {}
-    for cls in range(len(classes[0])):
-        classes_names.append(cat_to_name[f"{classes[0][cls]}"])
-        probilities.append(ps[0][cls])
-    
-    ser = {'name': pd.Series(data = classes_names), 'ps': pd.Series(data = probilities)}
+    ser = {'name': pd.Series(data = classes_names), 'ps': pd.Series(data = ps)}
     data = pd.DataFrame(ser)
     print(data)
