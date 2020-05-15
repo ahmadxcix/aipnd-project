@@ -84,7 +84,7 @@ def classifier(in_arg):
 
     criterion = nn.NLLLoss()
     optimizer = optim.Adam(model.classifier.parameters(), lr=in_arg.learning_rate)
-    device = torch.device(in_arg.device)
+    device = torch.device('cuda' if in_arg.gpu else 'cpu')
     model.to(device)
     epochs = in_arg.epochs
     steps = 0

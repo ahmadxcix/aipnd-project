@@ -22,7 +22,8 @@ def load(path):
     model = models.vgg16(pretrained=True)
     for param in model.parameters():
         param.requires_grad = False
-        
+    
+    
     model.features = checkpoint['features']
     model.classifier = checkpoint['classifier']
     model.modules = checkpoint['modules']
@@ -62,7 +63,7 @@ def predict(image_path, model, topk):
     '''
     model.to("cpu")
     model.eval()
-    # TODO: Implement the code to predict the class from an image file
+
     img = process_image(image_path)
     img_tensor = torch.from_numpy(img)
     img_tensor.unsqueeze_(0)
@@ -81,6 +82,9 @@ def classifier(in_arg):
     
     img_path = in_arg.image_path
     model = load(in_arg.checkpoint)
+    device = torch.device('cuda' if in_arg.gpu else 'cpu')
+    model.to(device)
+
     topk = in_arg.topk
     
     ps, classes = predict(img_path, model, topk)
@@ -96,14 +100,3 @@ def classifier(in_arg):
     ser = {'name': pd.Series(data = classes_names), 'ps': pd.Series(data = probilities)}
     data = pd.DataFrame(ser)
     print(data)
-
-    
-    
-    
-    
-    
-    
-    
-    
-
-    

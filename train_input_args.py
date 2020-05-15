@@ -1,4 +1,5 @@
 import argparse
+import torch
 
 def train_input_args():
     parser = argparse.ArgumentParser()
@@ -14,6 +15,12 @@ def train_input_args():
     parser.add_argument('--learning_rate', type=float, default=0.001, help='insert a learing rate')
     parser.add_argument('--hidden_units', type=int, default=512, help='set numbers of units in the hidden layer')
     parser.add_argument('--epochs', type=int, default=20, help='set number of epochs to train the network')
-    parser.add_argument('--gpu', type=str, default='cuda',  help='choose cuda or cpu')
+    
+    if torch.cuda.is_available():
+        parser.add_argument('--gpu', dest='gpu', default=False, action='store_true',
+                            help='use GPU if available')
+    else:
+        parser.add_argument('--gpu', dest='gpu', default=False, action='store_false',
+                            help='use GPU if available')
     
     return parser.parse_args()
